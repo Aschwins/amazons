@@ -1,6 +1,7 @@
 const boardwidth = 6;
 const w = 80;
 const n_amazons = 2;
+const move = 'white';
 
 
 function create2darray(m, n, v) {
@@ -39,11 +40,13 @@ class square {
 }
 
 class amazon {
-	constructor(x, y, width, team) {
-		this.x = x;
-		this.y = y;
+	constructor(i, j, width, team) {
+		this.i = i
+		this.j = j
 		this.w = width
 		this.team = team
+		this.x = i * width;
+		this.y = j * width;
 	}
 
 	show() {
@@ -89,9 +92,31 @@ class amazon {
 	}
 }
 
+function select_sq(mouse_x, mouse_y) {
+	for (i = 0; i < boardwidth; i++) {
+		row = squares[i];
+		row.forEach(function(sq) {
+			if (sq.x < mouse_x && 
+				sq.x + sq.w > mouse_x && 
+				sq.y < mouse_y && 
+				sq.y + sq.w > mouse_y) {
+			
+				console.log(sq);
+			}
+		});
+	}
+
+}
+
+// draw squares in draw. color select with yellow
+
+
+function mousePressed() {
+	console.log("mouse is pressed");
+	select_sq(mouseX, mouseY);
+}
 
 function setup() {
-
 	// Create the board with array of squares.
 	createCanvas(boardwidth * w, boardwidth * w);
 	squares = [];
@@ -112,10 +137,9 @@ function setup() {
 
 	board_array = create2darray(boardwidth, boardwidth, 0);
 	// Create an Amazon
-	A1 = new amazon(0, 0, w, 'black');
-	A2 = new amazon((boardwidth - 1)*w, 4*w, w, 'white')
-	console.log(A1);
-
+	A1 = new amazon(0, 2, w, 'black');
+	A2 = new amazon(5, 3, w, 'white')
+	console.log(squares);
 }
 
 function draw() {
