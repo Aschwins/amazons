@@ -2,6 +2,7 @@ const boardwidth = 6;
 const w = 80;
 const n_amazons = 2;
 const move = 'white';
+var selected;
 
 
 function create2darray(m, n, v) {
@@ -19,7 +20,7 @@ function create2darray(m, n, v) {
 }
 
 class square {
-	constructor(x, y, w, r, g, b, color, state) {
+	constructor(x, y, w, r, g, b, color) {
 		this.x = x;
 		this.y = y;
 		this.w = w;
@@ -29,28 +30,37 @@ class square {
 		this.g = g;
 		this.b = b;
 		this.color = color;
+		this.selected = false;
 		this.state = 'clear';
 	}
 	
 	show() {
-		fill(this.r, this.g, this.b);		
-		strokeWeight(2);
-		rect(this.x, this.y, this.w, this.w);
+		if (this.selected) {
+			fill(255, 255, 102);		
+			strokeWeight(2);
+			rect(this.x, this.y, this.w, this.w);
+		}
+		else {
+			fill(this.r, this.g, this.b);		
+			strokeWeight(2);
+			rect(this.x, this.y, this.w, this.w);
+		}
+	}
+
+	select() {
+		this.selected = !this.selected
 	}
 }
 
 class amazon {
-	constructor(i, j, width, team) {
-		this.i = i
-		this.j = j
+	constructor(square, width, team) {
 		this.w = width
 		this.team = team
-		this.x = i * width;
-		this.y = j * width;
+		this.x = square.x;
+		this.y = square.y;
 	}
 
 	show() {
-
 		if (this.team == 'black') {
 			fill(0);
 		}
@@ -102,10 +112,23 @@ function select_sq(mouse_x, mouse_y) {
 				sq.y + sq.w > mouse_y) {
 			
 				console.log(sq);
+				if (selected == sq) {
+					selected = undefined;
+					sq.select();
+				}
+				else if (selected == undefined) {
+					selected = sq;
+					sq.select();
+				}
+				else {
+					sq.select();
+					selected.select();
+					selected = sq;
+				}
+
 			}
 		});
 	}
-
 }
 
 // draw squares in draw. color select with yellow
@@ -137,12 +160,18 @@ function setup() {
 
 	board_array = create2darray(boardwidth, boardwidth, 0);
 	// Create an Amazon
-	A1 = new amazon(0, 2, w, 'black');
-	A2 = new amazon(5, 3, w, 'white')
+	A1 = new amazon(squares[0][2], w, 'black');
+	A2 = new amazon(squares[5][3], w, 'white')
 	console.log(squares);
 }
 
 function draw() {
+
+	for (i=0; i < boardwidth; i++) {
+		for (j=0; j < boardwidth; j++) {
+			squares[i][j].show();
+		}
+	}
 
 	A1.show();
 	A2.show();
