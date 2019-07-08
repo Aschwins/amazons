@@ -20,8 +20,8 @@ class square {
         this.i = i;
         this.j = j;
         this.state = state;
-        this.x = i * sq_width;
-        this.y = j * sq_width;
+        this.x = j * sq_width;
+        this.y = i * sq_width;
         this.w = sq_width;
     }
 
@@ -51,6 +51,42 @@ class square {
                 fill(85, 107, 47, 100);
                 ellipseMode(CENTER);
                 ellipse(this.x + 0.5 * this.w, this.y + 0.5 * this.w, this.w/5, this.w/5)
+            }
+        }
+        else if (this.state == '2') {
+            if ((this.i + this.j) % 2 != 0) {
+                fill(139, 69, 19); // Black Square
+                stroke(0);	
+                strokeWeight(2);
+                rect(this.x, this.y, this.w, this.w);
+                noStroke();
+                fill(178, 34, 34, 100);
+                ellipseMode(CENTER);
+                ellipse(this.x + 0.5 * this.w, this.y + 0.5 * this.w, this.w/5, this.w/5)
+            }
+            else {
+                fill(255,248,220); // White Square
+                stroke(0);
+                strokeWeight(2);
+                rect(this.x, this.y, this.w, this.w);
+                noStroke();
+                fill(178, 34, 34, 100);
+                ellipseMode(CENTER);
+                ellipse(this.x + 0.5 * this.w, this.y + 0.5 * this.w, this.w/5, this.w/5)
+            }
+        }
+        else if (this.state == 'F'){
+            if ((this.i + this.j) % 2 != 0) {
+                fill(178, 34, 34, 100); // Black Square
+                stroke(0);		
+                strokeWeight(2);
+                rect(this.x, this.y, this.w, this.w);
+            }
+            else {
+                fill(178, 34, 34, 100); // White Square
+                stroke(0);		
+                strokeWeight(2);
+                rect(this.x, this.y, this.w, this.w);
             }
         }
         else {
@@ -327,7 +363,6 @@ function mousePressed() {
     // w_select stage
     if (state == 'w_select') {
         a = select_amazon(mouseX, mouseY);
-        console.log(a);
         if (a != undefined) {
             if (a.team == 'W') {
                 a.state = 'Move';
@@ -366,22 +401,27 @@ function mousePressed() {
                 }
             }
         }
-        // 2. Move
 
-        // TYPE THIS OUT WITH TWO VARIABLES! NEW SQUARE OLD SQUARE TO GET ID OF SPAGETHHi
+        // 2. Move
         selected_square = select_square(mouseX, mouseY)
-        console.log(selected_square);
         if (selected_square != undefined) {
             if (selected_square.state == '1') {
                 // Move the amazon
+                let new_square = selected_square;
                 amazons.forEach(a => {
                     if (a.state == 'Move') {
+                        let old_square = a.square;
                         // Change the squares and board
-                        a.square.state = '0';
-                        a.move(selected_square);
-                        selected_square.state = 'W';
+                        old_square.state = '0';
+                        board[old_square.i][old_square.j] = '0'
+                        a.move(new_square);
+                        new_square.state = 'W';
+                        board[new_square.i][new_square.j] = 'W'
+
 
                         a.state = '0';
+
+                        // Update all options back to zero.
                         for (i = 0; i < boardwidth; i++) {
                             for (j = 0; j < boardwidth; j++) {
                                 if (squares[i][j].state == '1'){
@@ -393,23 +433,163 @@ function mousePressed() {
                             }
                         }
                         state = 'w_shoot'
+
+                        // Change all option_squares to '2' from the new square.
+
+                        horizontal_options = check_horizontal(new_square.i, new_square.j);
+                        vertical_options = check_vertical(new_square.i, new_square.j);
+                        diagonal_options = check_diagonal(new_square.i, new_square.j);
+
+                        options = horizontal_options.concat(vertical_options).concat(diagonal_options);
+                        options.forEach(option => {
+                            squares[option[0]][option[1]].state = '2';
+                            board[option[0]][option[1]] = '2'
+                        })
                     }
                 })
             }
         }
     }
 
-    // w_shoot stage
+    // w_shoot
+    else if (state == 'w_shoot'){
+        selected_square = select_square(mouseX, mouseY);
+        if (selected_square != undefined){
+            if (selected_square.state == '2') {
+                selected_square.state = 'F'; // F=Fire
+                board[selected_square.i][selected_square.j] = 'F';
+                // Update Squares
+                for (i=0; i < boardwidth; i++) {
+                    for (j=0; j < boardwidth; j++) {
+                        if (squares[i][j].state == '2') {
+                            squares[i][j].state = '0';
+                        }
+                        if (board[i][j] == '2') {
+                            board[i][j] = '0';
+                        }
+                    }
+                }
+                state = 'b_select'
+            }
+        }
+    }
 
     // b_select stage
+    else if (state == 'b_select') {
+        a = select_amazon(mouseX, mouseY);
+        if (a != undefined) {
+            if (a.team == 'B') {
+                a.state = 'Move';
+                let options = [];
+                let diagonal_options = check_diagonal(a.square.i, a.square.j);
+                let horizontal_options = check_horizontal(a.square.i, a.square.j);
+                let vertical_options = check_vertical(a.square.i, a.square.j);
+                options = diagonal_options.concat(horizontal_options).concat(vertical_options);
+                options.forEach(option => {
+                    board[option[0]][option[1]] = '1';
+                    squares[option[0]][option[1]].state = '1';
+                });
+                state = 'b_move';
+            }
+        } 
+    }
 
     // b_move stage
-    // 1. Go back
-    // 2. Move
+    else if (state == 'b_move') {
+        // 1. Go back (deselect)
+        a = select_amazon(mouseX, mouseY);
+        if (a != undefined) {
+            if (a.team == 'B') {
+                a.state = '0';
+                state = 'b_select';
+                for (i = 0; i < boardwidth; i++) {
+                    for (j = 0; j < boardwidth; j++) {
+                        if (squares[i][j].state = '1') {
+                            squares[i][j].state = '0';
+                        }
+                        if (board[i][j] == '1') {
+                            board[i][j] = '0';
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Move
+        selected_square = select_square(mouseX, mouseY)
+        if (selected_square != undefined) {
+            if (selected_square.state == '1') {
+                // Move the amazon
+                let new_square = selected_square;
+                amazons.forEach(a => {
+                    if (a.state == 'Move') {
+                        let old_square = a.square;
+                        // Change the squares and board
+                        old_square.state = '0';
+                        board[old_square.i][old_square.j] = '0'
+                        a.move(new_square);
+                        new_square.state = 'B';
+                        board[new_square.i][new_square.j] = 'B'
+
+
+                        a.state = '0';
+
+                        // Update all options back to zero.
+                        for (i = 0; i < boardwidth; i++) {
+                            for (j = 0; j < boardwidth; j++) {
+                                if (squares[i][j].state == '1'){
+                                    squares[i][j].state = '0'
+                                }
+                                if (board[i][j] == '1') {
+                                    board[i][j] = '0'
+                                }
+                            }
+                        }
+                        state = 'b_shoot'
+
+                        // Change all option_squares to '2' from the new square.
+
+                        horizontal_options = check_horizontal(new_square.i, new_square.j);
+                        vertical_options = check_vertical(new_square.i, new_square.j);
+                        diagonal_options = check_diagonal(new_square.i, new_square.j);
+
+                        options = horizontal_options.concat(vertical_options).concat(diagonal_options);
+                        options.forEach(option => {
+                            squares[option[0]][option[1]].state = '2';
+                            board[option[0]][option[1]] = '2'
+                        })
+                    }
+                })
+            }
+        }
+    }
 
     // b_shoot stage
-
+    else if (state == 'b_shoot'){
+        selected_square = select_square(mouseX, mouseY);
+        if (selected_square != undefined){
+            if (selected_square.state == '2') {
+                selected_square.state = 'F'; // F=Fire
+                board[selected_square.i][selected_square.j] = 'F';
+                // Update Squares
+                for (i=0; i < boardwidth; i++) {
+                    for (j=0; j < boardwidth; j++) {
+                        if (squares[i][j].state == '2') {
+                            squares[i][j].state = '0';
+                        }
+                        if (board[i][j] == '2') {
+                            board[i][j] = '0';
+                        }
+                    }
+                }
+                state = 'w_select'
+            }
+        }
+    }
     // w_select stage. 
+
+    // presseing select twice resets "F"? !!!!!!
+    //PResseigs seleclt twisce resets :F::F!!!
 }
 
 function setup() {
