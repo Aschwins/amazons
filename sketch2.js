@@ -210,8 +210,52 @@ function create2darray(m, n, v = undefined) {
 }
 
 
-function game_ended() {
+function game_ended(state, board) {
     // Function that checks if the game is ended.
+
+    // If state is w_select (white's turn)
+    if (state == 'w_select') {
+        options = [];
+        // Check for each square with a 'W' for all the options.
+        // If the options are empty return true
+        for (i=0; i < boardwidth; i++) {
+            for (j=0; j< boardwidth; j++) {
+                if (board[i][j] == 'W') {
+                    horizontal_options = check_horizontal(i, j);
+                    vertical_options = check_vertical(i, j);
+                    diagonal_options = check_diagonal(i, j);
+                    options = diagonal_options.concat(horizontal_options).concat(vertical_options);
+                    console.log("options", options);
+                }
+            }
+        }
+        if (options.length == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (state == 'b_select') {
+        // Check for each square with a 'B' for all the options
+        options = [];
+        for (i=0; i < boardwidth; i++) {
+            for (j=0; j < boardwidth; j++) {
+                if (board[i][j] == 'B') {
+                    horizontal_options = check_horizontal(i, j);
+                    vertical_options = check_vertical(i, j);
+                    diagonal_options = check_diagonal(i, j);
+                    options = diagonal_options.concat(horizontal_options).concat(vertical_options);
+                }
+            }
+        }
+        if (options.length == 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
 
 function select_amazon(mouse_x, mouse_y) {
@@ -391,7 +435,7 @@ function mousePressed() {
                 state = 'w_select';
                 for (i = 0; i < boardwidth; i++) {
                     for (j = 0; j < boardwidth; j++) {
-                        if (squares[i][j].state = '1') {
+                        if (squares[i][j].state == '1') {
                             squares[i][j].state = '0';
                         }
                         if (board[i][j] == '1') {
@@ -470,6 +514,10 @@ function mousePressed() {
                     }
                 }
                 state = 'b_select'
+                // Check if the game is ended
+                if (game_ended(state, board)) {
+                    console.log("WHITE WINS");
+                };
             }
         }
     }
@@ -504,7 +552,7 @@ function mousePressed() {
                 state = 'b_select';
                 for (i = 0; i < boardwidth; i++) {
                     for (j = 0; j < boardwidth; j++) {
-                        if (squares[i][j].state = '1') {
+                        if (squares[i][j].state == '1') {
                             squares[i][j].state = '0';
                         }
                         if (board[i][j] == '1') {
@@ -583,6 +631,10 @@ function mousePressed() {
                     }
                 }
                 state = 'w_select'
+                // Check if the game is ended
+                if (game_ended(state, board)) {
+                    console.log("BLACK WINS");
+                };
             }
         }
     }
