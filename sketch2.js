@@ -1,6 +1,6 @@
 // Global vars - alter these to change the game.
-const boardwidth = 3;
-const n_amazons = 1; //have to fix to have variable number of amazons.
+const boardwidth = 7;
+const n_amazons = 2; //have to fix to have variable number of amazons.
 const sq_width = 80;
 
 // Global vars - don't alter these.
@@ -8,13 +8,38 @@ const states = ['w_select', 'w_move', 'w_shoot', 'b_select', 'b_move', 'b_shoot'
 var state = 'w_select';
 const square_states = ['B', 'W', '0', '1', '2', 'F'];
 const amazon_states = ['0', 'Move', 'Shoot'];
-const board = create2darray(boardwidth, boardwidth, '0');
+var board = create2darray(boardwidth, boardwidth, '0');
 
 // Assign the first amazons to the board matrix.
-board[0][0] = 'B';
-board[boardwidth-1][boardwidth-1] = 'W';
 
+function assign_amazons(number_of_amazons, board) {
+    var new_board = board
+    white_side = []
+    black_side = []
+    for (i=0; i < boardwidth; i++) {
+        white_side.push([0, i]);
+    }
+    for (i=0; i< boardwidth; i++) {
+        white_side.push([i, boardwidth-1]);
+    }
+    for (i=boardwidth-1; i>-1; i--) {
+        black_side.push([boardwidth-1, i]);
+    }
+    for (i=boardwidth-1; i>-1; i--) {
+        black_side.push([i, 0]);
+    }
+    
 
+    const stepsize = Math.floor(black_side.length/number_of_amazons)
+    console.log('step', stepsize);
+    for (i=0; i < number_of_amazons; i++){
+        var white_amazon_square = white_side[stepsize * i];
+        var black_amazon_square = black_side[stepsize * i];
+        new_board[white_amazon_square[0]][white_amazon_square[1]] = 'W';
+        new_board[black_amazon_square[0]][black_amazon_square[1]] = 'B';
+    }
+    return new_board
+}
 class square {
     constructor(i, j, state) {
         this.i = i;
@@ -185,6 +210,7 @@ for (i=0; i < boardwidth; i++) {
 };
 
 // Create amazons
+var board = assign_amazons(n_amazons, board);
 const amazons = []
 for (i=0; i < boardwidth; i++) {
     for (j=0; j < boardwidth; j++) {
