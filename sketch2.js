@@ -1,10 +1,11 @@
 // Global vars - alter these to change the game.
-const boardwidth = 7;
-const n_amazons = 2; //have to fix to have variable number of amazons.
+const boardwidth = 5;
+const n_amazons = 2;
 const sq_width = 80;
 
 // Global vars - don't alter these.
-const states = ['w_select', 'w_move', 'w_shoot', 'b_select', 'b_move', 'b_shoot'];
+const states = [
+    'w_select', 'w_move', 'w_shoot', 'b_select', 'b_move', 'b_shoot'];
 var state = 'w_select';
 const square_states = ['B', 'W', '0', '1', '2', 'F'];
 const amazon_states = ['0', 'Move', 'Shoot'];
@@ -13,6 +14,10 @@ var board = create2darray(boardwidth, boardwidth, '0');
 // Assign the first amazons to the board matrix.
 
 function assign_amazons(number_of_amazons, board) {
+    /*
+    Function that assigns a number of amazons to the board.
+    Returns the new board.
+    */
     var new_board = board
     white_side = []
     black_side = []
@@ -29,9 +34,7 @@ function assign_amazons(number_of_amazons, board) {
         black_side.push([i, 0]);
     }
     
-
     const stepsize = Math.floor(black_side.length/number_of_amazons)
-    console.log('step', stepsize);
     for (i=0; i < number_of_amazons; i++){
         var white_amazon_square = white_side[stepsize * i];
         var black_amazon_square = black_side[stepsize * i];
@@ -40,7 +43,13 @@ function assign_amazons(number_of_amazons, board) {
     }
     return new_board
 }
+
+
 class square {
+    /*
+    Square class. Square contains information about the square. 
+    Squares are arranged in a board. 
+    */
     constructor(i, j, state) {
         this.i = i;
         this.j = j;
@@ -51,11 +60,12 @@ class square {
     }
 
     show() {
-        // Here comes a huge case. 
-        // If square is selected.
-        // If square is burnt. etc.
-
-        // If the square is an option ('1')
+        /*
+        Square method which shows the square. Square has different states.
+        1 - Option to move or shoot for black.
+        2 - Option to move or shoot for white
+        F - Flambéd square by the arrow of an amazon.
+        */
         if (this.state == '1') {
             if ((this.i + this.j) % 2 != 0) {
                 fill(139, 69, 19); // Black Square
@@ -128,11 +138,21 @@ class square {
                 rect(this.x, this.y, this.w, this.w);
             }
         }
-
     }
 }
 
+
 class amazon {
+    /*
+    Amazon class. Everything there is about being an amazon. Amazon needs a 
+    square to stand on. 
+    square  Square object [i, j] for the amazon to stand on
+    team    Team white or black
+    state   State the amazon is in
+            '0'     - Dormant
+            'Move'  - Moving
+
+    */
     constructor(square, team, state = '0') {
         this.square = square;
         this.team = team;
@@ -142,20 +162,11 @@ class amazon {
         this.w = sq_width;
     }
 
-    select() {
-
-    }
-
     move(sq) {
         // Moves the amazon to a new square (i, j)
         this.square = sq;
         this.x = sq.x
         this.y = sq.y
-        console.log("the amazon moved!")
-    }
-
-    shoot() {
-
     }
 
     show() {

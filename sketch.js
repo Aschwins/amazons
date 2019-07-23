@@ -1,4 +1,4 @@
-const boardwidth = 6;
+const boardwidth = 4;
 const w = 80;
 const n_amazons = 2;
 const move = 'white';
@@ -58,6 +58,7 @@ class amazon {
 		this.team = team
 		this.x = square.x;
 		this.y = square.y;
+		this.selected = false;
 	}
 
 	show() {
@@ -100,9 +101,13 @@ class amazon {
 			this.x + 0.85 * this.w, this.y + 0.77 * this.w, 
 			this.x + 0.75 * this.w, this.y + 0.77 * this.w);
 	}
+
+	move(new_square) {
+		this.square = new_square;
+	}
 }
 
-function select_sq(mouse_x, mouse_y) {
+function select_amazon(mouse_x, mouse_y) {
 	for (i = 0; i < boardwidth; i++) {
 		row = squares[i];
 		row.forEach(function(sq) {
@@ -136,7 +141,7 @@ function select_sq(mouse_x, mouse_y) {
 
 function mousePressed() {
 	console.log("mouse is pressed");
-	select_sq(mouseX, mouseY);
+	select_amazon(mouseX, mouseY);
 }
 
 function setup() {
