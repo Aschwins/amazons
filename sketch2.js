@@ -250,6 +250,20 @@ function create2darray(m, n, v = undefined) {
 function game_ended(state, board) {
     // Function that checks if the game is ended.
 
+    // When mouse is pressed should check the option for all the amazons.
+    // Should begin by checking options for white amazons.
+    if (state = 'w_select')
+    amazons.forEach(a => {
+        // Check for white amazons
+        let white_options = [];
+        let black_options = [];
+
+        if (a.team = 'W') {
+            horizontal_options = check_horizontal(a.square.i, a.square.j)
+        }
+    })
+
+
     // If state is w_select (white's turn)
     if (state == 'w_select') {
         options = [];
