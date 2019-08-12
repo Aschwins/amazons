@@ -73,7 +73,7 @@ class square {
                 strokeWeight(2);
                 rect(this.x, this.y, this.w, this.w);
                 noStroke();
-                fill(85, 107, 47, 100);
+                fill(85, 107, 47, 100); // Green
                 ellipseMode(CENTER);
                 ellipse(this.x + 0.5 * this.w, this.y + 0.5 * this.w, this.w/5, this.w/5)
             }
@@ -95,7 +95,7 @@ class square {
                 strokeWeight(2);
                 rect(this.x, this.y, this.w, this.w);
                 noStroke();
-                fill(178, 34, 34, 100);
+                fill(178, 34, 34, 100); // red flame
                 ellipseMode(CENTER);
                 ellipse(this.x + 0.5 * this.w, this.y + 0.5 * this.w, this.w/5, this.w/5)
             }

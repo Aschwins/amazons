@@ -61,6 +61,122 @@ function DrawAmazon(x, y, w, color) {
         x + 0.75 * w, y + 0.77 * w);
 }
 
+function SquareSelecter(mouse_x, mouse_y) {
+    /* Square selecter. Returns the square which is pressed after a 
+    mousepressed event.*/
+    // Checks wether a square is selected. Returns the selected square.
+    let selection;
+    for (i=0; i < boardwidth; i++) {
+        for (j=0; j < boardwidth; j++) {
+            if (board.matrix[i][j].x < mouse_x && 
+                board.matrix[i][j].x + board.matrix[i][j].width > mouse_x && 
+                board.matrix[i][j].y < mouse_y && 
+                board.matrix[i][j].y + board.matrix[i][j].width > mouse_y) {
+                    selection = [i, j];
+            }
+        }
+    }
+    return selection;
+}
+
+function ShowOptions(board, i, j){
+    /*
+    Shows all available options for a selected square in a board object.
+    Options are squares that can be reached horizontally, vertically
+    and diagonally from the selected square, without being obstructed
+    by a flaming square or another amazon.
+    */
+   let options = []
+
+   // Check above
+   for (row = i - 1; row > -1; row--) {
+       if (board.matrix[row][j].state == '0') {
+           options.push([row, j])
+       }
+       else {
+           break;
+       }
+   }
+
+   // Check below
+   for (row = i + 1; row < boardwidth; row++){
+       if (board.matrix[row][j].state == '0') {
+           options.push([row, j])
+       }
+       else {
+           break;
+       }
+   }
+
+    // Check left
+    for (col = j - 1; col > -1; col--) {
+        if (board.matrix[i][col].state == '0') {
+            options.push([i, col])
+        }
+        else {
+            break;
+        }
+    }
+
+    // Check right
+    for (col = j + 1; col < boardwidth; col++) {
+        if (board.matrix[i][col].state == '0') {
+            options.push([i, col])
+        }
+        else {
+            break;
+        }
+    }
+
+    let space_left = j;
+    let space_right = boardwidth - j - 1;
+    let space_up = i;
+    let space_down = boardwidth - i - 1;
+
+
+    // Check upleft
+    for (offset = 1; offset <= min(space_left, space_up); offset++) {
+        if (board.matrix[i - offset][j - offset].state == '0') {
+            options.push([i - offset, j - offset]);
+        }
+        else {
+            break;
+        }
+    }
+
+    // Check upright
+    for (offset = 1; offset <= min(space_right, space_up); offset++) {
+        if (board.matrix[i - offset][j + offset].state == '0') {
+            options.push([i - offset, j + offset]);
+        }
+        else {
+            break;
+        }
+    }
+
+    // Check downleft
+    for (offset = 1; offset <= min(space_left, space_down); offset++) {
+        if (board.matrix[i + offset][j - offset].state == '0') {
+            options.push([i + offset, j - offset]);
+        }
+        else {
+            break;
+        }
+    }
+
+    // Check downright
+    for (offset = 1; offset <= min(space_right, space_down); offset++) {
+        if (board.matrix[i + offset][j + offset].state == '0') {
+            options.push([i + offset, j + offset]);
+        }
+        else {
+            break;
+        }
+    }
+
+    return options;
+}
+
 class Board {
     constructor(
         x, y, w, h, sq_width, state, n_amazons
@@ -144,33 +260,83 @@ class Square {
         this.state = state;
         this.width = width;
         this.color = color;
+        this.selected = false;
+        this.option = false;
     }
 
     show() {
-        if (this.color == 'Black') {
-            fill(139, 69, 19);
-            stroke(0);
-            strokeWeight(2);
-            rect(this.x, this.y, this.width, this.width);
+        stroke(0);
+        strokeWeight(2);
+        if (this.selected == true) {
+            fill(255, 218, 185); // yellow
+        }
+        else if (this.color == 'Black') {
+            fill(139, 69, 19); // black
+
         }
         else {
-            fill(255, 248, 220);
-            stroke(0);
-            strokeWeight(2);
-            rect(this.x, this.y, this.width, this.width);
+            fill(255, 248, 220); // white
         }
+        rect(this.x, this.y, this.width, this.width);
 
         if (this.state == "White Amazon" || this.state ==  "Black Amazon") {
-            DrawAmazon(this.x, this.y, this.width, this.state)
+            DrawAmazon(this.x, this.y, this.width, this.state);
+        }
+
+        if (this.option == true) {
+            noStroke();
+            fill(85, 107, 47, 100); // Green
+            ellipseMode(CENTER);
+            ellipse(this.x + 0.5 * this.width, 
+                this.y + 0.5 * this.width, this.width/5, this.width/5);
         }
     }
+}
+
+function mousePressed() {
+    let [i, j] = SquareSelecter(mouseX, mouseY);
+    if ([i, j] != undefined) {
+        if (board.state == "white_selects") {
+            // Check if selection is white.
+            if (board.matrix[i][j].state == "White Amazon" ) {
+                board.matrix[i][j].selected = !board.matrix[i][j].selected;
+                if (board.matrix[i][j].selected) {
+                    let options = ShowOptions(board, i, j);
+                    console.log("options", options);
+                    options.forEach(option => {
+                        board.matrix[option[0]][option[1]].option = true;
+                    })
+                }
+            }
+        }
+        else if (board.state == "white_moves") {
+
+        }
+        else if (board.state == "white_shoots") {
+
+        }
+        else if (board.state == "black_selects") {
+
+        }
+        else if (board.state == "black_moves") {
+
+        }
+        else if (board.state == "black_shoots") {
+            
+        }
+        else {
+            console.log("Something went wrong, please try again.")
+        }
+    }
+
+
 }
 
 function setup() {
     createCanvas(boardwidth * sq_width, boardwidth * sq_width);
     board = new Board(
         0, 0, boardwidth * sq_width, 
-        boardwidth * sq_width, sq_width, state = "white_selects", n_amazons = 2);
+        boardwidth * sq_width, sq_width, state = states[0], n_amazons = 2);
     board.fill_board();
     board.show();
 }
