@@ -76,7 +76,12 @@ function SquareSelecter(mouse_x, mouse_y) {
             }
         }
     }
-    return selection;
+    if (selection) {
+        return selection;
+    }
+    else {
+        return [undefined, undefined];
+    };
 }
 
 function ShowOptions(board, i, j){
@@ -241,6 +246,118 @@ class Board {
         console.log(this.matrix)
     }
 
+    reset(state) {
+        for (i = 0; i < boardwidth; i++) {
+            for (j = 0; j < boardwidth; j++) {
+                board.matrix[i][j].selected = false;
+                board.matrix[i][j].option = false;
+                board.state = state;
+            }
+        }        
+    }
+
+    show_options(i, j) {
+        /*
+        Shows all available options for a selected square in a board object.
+        Options are squares that can be reached horizontally, vertically
+        and diagonally from the selected square, without being obstructed
+        by a flaming square or another amazon.
+        */
+        let options = [];
+
+        // Check above
+        for (let row = i - 1; row > -1; row--) {
+            if (this.matrix[row][j].state == '0') {
+                options.push([row, j])
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check below
+        for (let row = i + 1; row < boardwidth; row++){
+            if (this.matrix[row][j].state == '0') {
+                options.push([row, j])
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check left
+        for (let col = j - 1; col > -1; col--) {
+            if (this.matrix[i][col].state == '0') {
+                options.push([i, col])
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check right
+        for (let col = j + 1; col < boardwidth; col++) {
+            if (this.matrix[i][col].state == '0') {
+                options.push([i, col])
+            }
+            else {
+                break;
+            }
+        }
+
+        let space_left = j;
+        let space_right = boardwidth - j - 1;
+        let space_up = i;
+        let space_down = boardwidth - i - 1;
+
+
+        // Check upleft
+        for (let offset = 1; offset <= min(space_left, space_up); offset++) {
+            if (this.matrix[i - offset][j - offset].state == '0') {
+                options.push([i - offset, j - offset]);
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check upright
+        for (let offset = 1; offset <= min(space_right, space_up); offset++) {
+            if (this.matrix[i - offset][j + offset].state == '0') {
+                options.push([i - offset, j + offset]);
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check downleft
+        for (let offset = 1; offset <= min(space_left, space_down); offset++) {
+            if (this.matrix[i + offset][j - offset].state == '0') {
+                options.push([i + offset, j - offset]);
+            }
+            else {
+                break;
+            }
+        }
+
+        // Check downright
+        for (let offset = 1; offset <= min(space_right, space_down); offset++) {
+            if (this.matrix[i + offset][j + offset].state == '0') {
+                options.push([i + offset, j + offset]);
+            }
+            else {
+                break;
+            }
+        }
+
+        options.forEach(option => {
+            this.matrix[option[0]][option[1]].option = true;
+        });
+
+        return options;
+    }
+
     show() {
         /* Shows the board on the canvas.*/
         for (i = 0; i < this.m; i++) {
@@ -293,24 +410,29 @@ class Square {
     }
 }
 
+
+
 function mousePressed() {
     let [i, j] = SquareSelecter(mouseX, mouseY);
-    if ([i, j] != undefined) {
+
+    if (i != undefined) {
         if (board.state == "white_selects") {
-            // Check if selection is white.
-            if (board.matrix[i][j].state == "White Amazon" ) {
-                board.matrix[i][j].selected = !board.matrix[i][j].selected;
-                if (board.matrix[i][j].selected) {
-                    let options = ShowOptions(board, i, j);
-                    console.log("options", options);
-                    options.forEach(option => {
-                        board.matrix[option[0]][option[1]].option = true;
-                    })
+            if (board.matrix[i][j].state == "White Amazon") {
+                if (board.matrix[i][j].selected == true) {
+                    board.reset("white_selects");
                 }
+                else {
+                    board.reset("white_selects");
+                    board.matrix[i][j].selected = true;
+                    options = board.show_options(i, j);
+                    board.state = "white_moves";
+                }
+            } 
+            else {
+                board.reset("white_selects");
             }
         }
         else if (board.state == "white_moves") {
-
         }
         else if (board.state == "white_shoots") {
 
@@ -328,8 +450,14 @@ function mousePressed() {
             console.log("Something went wrong, please try again.")
         }
     }
-
-
+    else {
+        for (c = 0; c < boardwidth; c++) {
+            for (k = 0; k < boardwidth; k++) {
+                board.matrix[c][k].selected = false;
+                board.matrix[c][k].option = false;
+            }
+        }
+    }
 }
 
 function setup() {
