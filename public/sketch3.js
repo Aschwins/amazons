@@ -416,6 +416,11 @@ function mousePressed() {
     let [i, j] = SquareSelecter(mouseX, mouseY);
 
     if (i != undefined) {
+        let data = {
+            square: i
+        };
+        sendLog(data);
+
         if (board.state == "white_selects") {
             if (board.matrix[i][j].state == "White Amazon") {
                 if (board.matrix[i][j].selected == true) {
@@ -472,4 +477,21 @@ function setup() {
 
 function draw() {
     board.show();
+}
+
+
+
+async function sendLog(data)
+{
+    const options = {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }
+
+    const response = await fetch('/api/logs', options);
+    // const json = await response.json();
+    // console.log(json);
 }

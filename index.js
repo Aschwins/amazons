@@ -1,14 +1,31 @@
 const express = require('express')
+const Datastore = require('nedb');
 const app = express()
 const port = 3000
 
-//app.get('/', (req, res) => res.sendFile('public/index.html'))
-
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const db = new Datastore('database.db')
 
 app.use(express.static('public'));
 
-// respond with "hello world" when a GET request is made to the homepage
-app.get('/api', function (req, res) {
-    res.send('hello world')
-  })
+// Save data
+app.post('/api/logs', (request, response) => {
+  console.log(request);
+  console.log(request.body);
+  const data = request.body;
+  data['timestamp'] = Date.now();
+  db.insert(data);
+  response.json(data);
+});
+
+// Serve data
+app.get('/api/logs', (request, response) => {
+  console.log("GET request: ");
+  db.find({}, (err, data) => {
+      if (err) {
+          response.end();
+          return;
+      }
+      response.json(data);
+  });
+})
