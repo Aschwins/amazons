@@ -425,7 +425,7 @@ function mousePressed() {
                     board.reset("white_selects");
                     board.matrix[i][j].selected = true;
                     options = board.show_options(i, j);
-                    board.state = "white_moves";
+                    // board.state = "white_moves";
                 }
             } 
             else {
