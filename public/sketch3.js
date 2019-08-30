@@ -358,6 +358,22 @@ class Board {
         return options;
     }
 
+    moveAmazon(current_i, current_j, target_i, target_j) {
+        /*
+        Moves a square which contains an Amazon to square i, j.
+        */
+        if (
+            (board.matrix[current_i][current_j].state == "White Amazon") ||
+            (board.matrix[current_i][current_j].state == "Black Amaon")
+            ) {
+                board.matrix[target_i][target_j].state = board.matrix[current_i][current_j].state
+                board.matrix[current_i][current_j].state = '0'
+            }
+        else {
+            return
+        }
+    }
+
     show() {
         /* Shows the board on the canvas.*/
         for (i = 0; i < this.m; i++) {
@@ -410,14 +426,29 @@ class Square {
     }
 }
 
+async function sendLog(data) {
+    const options = {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }
+
+    const response = await fetch('/api/logs', options);
+    const json = await response.json();
+    console.log(json);
+}
 
 
 function mousePressed() {
     let [i, j] = SquareSelecter(mouseX, mouseY);
 
+    console.log(board.state);
     if (i != undefined) {
-        let data = {
-            square: i
+        const data = {
+            i,
+            j
         };
         sendLog(data);
 
@@ -430,15 +461,23 @@ function mousePressed() {
                     board.reset("white_selects");
                     board.matrix[i][j].selected = true;
                     options = board.show_options(i, j);
-                    // board.state = "white_moves";
+                    board.state = "white_moves";
                 }
             } 
             else {
                 board.reset("white_selects");
             }
         }
+
         else if (board.state == "white_moves") {
+            // sit 1: square outside a selector square gets pressed:
+            // Reset board to white selects.
+
+
+            // sit 2: square is a selector square
+
         }
+
         else if (board.state == "white_shoots") {
 
         }
@@ -477,21 +516,4 @@ function setup() {
 
 function draw() {
     board.show();
-}
-
-
-
-async function sendLog(data)
-{
-    const options = {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }
-
-    const response = await fetch('/api/logs', options);
-    // const json = await response.json();
-    // console.log(json);
 }

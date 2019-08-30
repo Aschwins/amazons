@@ -7,10 +7,14 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const db = new Datastore('database.db')
 
 app.use(express.static('public'));
+app.use(express.json({
+  limit: '1mb'
+}));
+
+db.loadDatabase();
 
 // Save data
 app.post('/api/logs', (request, response) => {
-  console.log(request);
   console.log(request.body);
   const data = request.body;
   data['timestamp'] = Date.now();
