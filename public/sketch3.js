@@ -358,19 +358,19 @@ class Board {
         return options;
     }
 
-    moveAmazon(current_i, current_j, target_i, target_j) {
+    moveAmazon(target_i, target_j) {
         /*
-        Moves a square which contains an Amazon to square i, j.
+        Moves a selected amazon to square i, j
         */
-        if (
-            (board.matrix[current_i][current_j].state == "White Amazon") ||
-            (board.matrix[current_i][current_j].state == "Black Amaon")
-            ) {
-                board.matrix[target_i][target_j].state = board.matrix[current_i][current_j].state
-                board.matrix[current_i][current_j].state = '0'
+        for (i=0; i < boardwidth; i++) {
+            for (j=0; j < boardwidth; j++) {
+                if (board.matrix[i][j].selected == true) {
+                    let amazon_color = board.matrix[i][j].state;
+                    board.matrix[i][j].state = "0"; // remove the old amazon.
+                    board.matrix[target_i][target_j].state = amazon_color;
+                    board.matrix[i][j].option = false;
+                }
             }
-        else {
-            return
         }
     }
 
@@ -400,12 +400,14 @@ class Square {
     show() {
         stroke(0);
         strokeWeight(2);
-        if (this.selected == true) {
-            fill(255, 218, 185); // yellow
+        if (this.state == "F") {
+            fill(178, 34, 34, 100); // red
+        }
+        else if (this.selected == true) {
+            fill(255, 218, 185); // pinkish
         }
         else if (this.color == 'Black') {
             fill(139, 69, 19); // black
-
         }
         else {
             fill(255, 248, 220); // white
@@ -419,6 +421,7 @@ class Square {
         if (this.option == true) {
             noStroke();
             fill(85, 107, 47, 100); // Green
+            // fill(178, 34, 34, 100); // Red
             ellipseMode(CENTER);
             ellipse(this.x + 0.5 * this.width, 
                 this.y + 0.5 * this.width, this.width/5, this.width/5);
@@ -427,6 +430,10 @@ class Square {
 }
 
 async function sendLog(data) {
+    /*
+    A function which sends log data to the server via a POST
+    request using the fetch() function.
+    */
     const options = {
         method: 'POST',
         headers: {
@@ -446,60 +453,106 @@ function mousePressed() {
 
     console.log(board.state);
     if (i != undefined) {
+
+        // Logging
         const data = {
             i,
             j
         };
         sendLog(data);
 
+        // White Selects.
         if (board.state == "white_selects") {
-            if (board.matrix[i][j].state == "White Amazon") {
+            // If an option gets pressed we move there. 
+            if (board.matrix[i][j].option == true) {
+                board.moveAmazon(i, j);
+                board.reset("white_shoots"); // reset the board to white_shoots.
+                // Prepare shooting
+                board.matrix[i][j].selected = true;
+                board.show_options(i, j);
+            }
+            // White Amazon gets pressed.
+            else if (board.matrix[i][j].state == "White Amazon") {
+                // Amazon was already selected -> deselect
                 if (board.matrix[i][j].selected == true) {
                     board.reset("white_selects");
                 }
+                // Amazon was not yet selected -> select
                 else {
                     board.reset("white_selects");
                     board.matrix[i][j].selected = true;
-                    options = board.show_options(i, j);
-                    board.state = "white_moves";
+                    board.show_options(i, j);
                 }
-            } 
+            }
+            // Anything else happens.
             else {
                 board.reset("white_selects");
             }
         }
 
-        else if (board.state == "white_moves") {
-            // sit 1: square outside a selector square gets pressed:
-            // Reset board to white selects.
-
-
-            // sit 2: square is a selector square
-
-        }
-
+        // White Shoots
         else if (board.state == "white_shoots") {
-
+            // shoot arrow
+            if (board.matrix[i][j].option == true) {
+                board.matrix[i][j].state = "F"; // burn the square
+                board.reset("black_selects")
+            }
+            else {
+                return;
+            }
         }
+
+        // Black Selects
         else if (board.state == "black_selects") {
-
+            // If an option gets pressed we move there. 
+            if (board.matrix[i][j].option == true) {
+                board.moveAmazon(i, j);
+                board.reset("black_shoots"); // reset the board to black_shoots.
+                // Prepare shooting
+                board.matrix[i][j].selected = true;
+                board.show_options(i, j);
+            }
+            // Black Amazon gets pressed.
+            else if (board.matrix[i][j].state == "Black Amazon") {
+                // Amazon was already selected -> deselect
+                if (board.matrix[i][j].selected == true) {
+                    board.reset("black_selects");
+                }
+                // Amazon was not yet selected -> select
+                else {
+                    board.reset("black_selects");
+                    board.matrix[i][j].selected = true;
+                    board.show_options(i, j);
+                }
+            }
+            // Anything else happens.
+            else {
+                board.reset("black_selects");
+            }
         }
-        else if (board.state == "black_moves") {
 
-        }
+        // Black Shoots
         else if (board.state == "black_shoots") {
-            
+            // shoot arrow
+            if (board.matrix[i][j].option == true) {
+                board.matrix[i][j].state = "F"; // burn the square
+                board.reset("white_selects")
+            }
+            else {
+                return;
+            }
         }
         else {
             console.log("Something went wrong, please try again.")
         }
     }
     else {
-        for (c = 0; c < boardwidth; c++) {
-            for (k = 0; k < boardwidth; k++) {
-                board.matrix[c][k].selected = false;
-                board.matrix[c][k].option = false;
-            }
+        // If board state is selects, reset otherwise don't.
+        if ((board.state == "white_selects") || (board.state == "black_selects")) {
+            board.reset(board.state);
+        }
+        else {
+            return;
         }
     }
 }
