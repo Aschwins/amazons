@@ -429,22 +429,7 @@ class Square {
     }
 }
 
-async function sendLog(data) {
-    /*
-    A function which sends log data to the server via a POST
-    request using the fetch() function.
-    */
-    // const options = {
-    //     method: 'POST',
-    //     headers: {
-    //         "Content-Type": "application/json"
-    //     },
-    //     body: JSON.stringify(data)
-    // }
-
-    // const response = await fetch('/api/logs', options);
-    // const json = await response.json();
-    // console.log(json);
+async function sendMove(data) {
     ws.send(JSON.stringify({
         playerId,
         data
@@ -452,7 +437,43 @@ async function sendLog(data) {
 }
 
 window.addEventListener('move', function(e) {
-    console.log(e.detail.data);
+    var data = JSON.parse(e.detail.data).data;
+    console.log(data.data);
+
+    let i = data.i; 
+    let j = data.j;
+    let state = data.state;
+    console.log(state);
+    
+    board.state = state;
+
+    if (board.state == "white_selects") {
+        board.moveAmazon(i, j);
+        board.reset("white_shoots"); // reset the board to white_shoots.
+        // Prepare shooting
+        board.matrix[i][j].selected = true;
+        board.show_options(i, j);
+    }
+    else if (board.state == "white_shoots") {
+        // shoot arrow
+        board.matrix[i][j].state = "F"; // burn the square
+        board.reset("black_selects");
+    }
+    else if (board.state == "black_selects") {
+        board.moveAmazon(i, j);
+        board.reset("black_shoots"); // reset the board to white_shoots.
+        // Prepare shooting
+        board.matrix[i][j].selected = true;
+        board.show_options(i, j);
+    }
+    else if (board.state == "black_shoots") {
+        // shoot arrow
+        board.matrix[i][j].state = "F"; // burn the square
+        board.reset("black_selects");
+    }
+    else {
+        console.log("Something went wrong, please try again.")
+    }
 }, false);
 
 function mousePressed() {
@@ -461,18 +482,20 @@ function mousePressed() {
     console.log(board.state);
     if (i != undefined) {
 
-        // Logging
+        // Prepare to send move to server
+        let state = board.state;
         const data = {
             i,
-            j
+            j,
+            state
         };
-        sendLog(data);
 
         // White Selects.
         if (board.state == "white_selects") {
             // If an option gets pressed we move there. 
             if (board.matrix[i][j].option == true) {
                 board.moveAmazon(i, j);
+                sendMove(data);
                 board.reset("white_shoots"); // reset the board to white_shoots.
                 // Prepare shooting
                 board.matrix[i][j].selected = true;
@@ -502,7 +525,8 @@ function mousePressed() {
             // shoot arrow
             if (board.matrix[i][j].option == true) {
                 board.matrix[i][j].state = "F"; // burn the square
-                board.reset("black_selects")
+                sendMove(data);
+                board.reset("black_selects");
             }
             else {
                 return;
@@ -514,6 +538,7 @@ function mousePressed() {
             // If an option gets pressed we move there. 
             if (board.matrix[i][j].option == true) {
                 board.moveAmazon(i, j);
+                sendMove(data);
                 board.reset("black_shoots"); // reset the board to black_shoots.
                 // Prepare shooting
                 board.matrix[i][j].selected = true;
@@ -543,6 +568,7 @@ function mousePressed() {
             // shoot arrow
             if (board.matrix[i][j].option == true) {
                 board.matrix[i][j].state = "F"; // burn the square
+                sendMove(data);
                 board.reset("white_selects")
             }
             else {
