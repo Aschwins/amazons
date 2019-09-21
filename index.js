@@ -22,7 +22,8 @@ wss.on('connection', function (ws) {
   ws.on('message', function (message) {
     obj = JSON.parse(message);
     for (var key in clients) {
-      if (key != i) {
+      if (key != obj.playerId) {
+        console.log(`sending message to player ${playerId}: ${obj.data}`)
         clients[key].send(JSON.stringify({ data: obj.data }));
       }
     }
@@ -34,7 +35,7 @@ wss.on('connection', function (ws) {
 
   clients[i] = ws;
 
-  ws.send(`connected: ${i}`);
+  ws.send(`${i}`);
 
   i++;
 })
