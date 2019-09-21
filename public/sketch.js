@@ -451,6 +451,9 @@ async function sendLog(data) {
     }));
 }
 
+window.addEventListener('move', function(e) {
+    console.log(e.detail.data);
+}, false);
 
 function mousePressed() {
     let [i, j] = SquareSelecter(mouseX, mouseY);

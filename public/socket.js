@@ -6,6 +6,10 @@ ws.onmessage = function(e) {
         console.log(`Received user name ${e.data}`);
         playerId = e.data;
     }
+    else {
+        let move = new CustomEvent('move', { detail: { data: e.data } });
 
-    console.log(e.data);
+        window.dispatchEvent(move);
+    }
 };
+
