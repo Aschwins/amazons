@@ -13,16 +13,43 @@ app.use(express.json({
 
 db.loadDatabase();
 
+// Serve data
+var WebSocketServer = require('ws').Server;
+var clients = {};
+wss = new WebSocketServer({port: 40510});
+i = 1;
+wss.on('connection', function (ws) {
+  ws.on('message', function (message) {
+    obj = JSON.parse(message);
+    for (var key in clients) {
+      if (key != i) {
+        clients[key].send(JSON.stringify({ data: obj.data }));
+      }
+    }
+  })
+  
+  ws.on('close', function(ws) {
+    delete clients[i];
+  })
+
+  clients[i] = ws;
+
+  ws.send(`connected: ${i}`);
+
+  i++;
+})
+
 // Save data
 app.post('/api/logs', (request, response) => {
   console.log(request.body);
   const data = request.body;
   data['timestamp'] = Date.now();
   db.insert(data);
+  ws.send(`ws: ${data}`)
   response.json(data);
 });
 
-// Serve data
+
 app.get('/api/logs', (request, response) => {
   console.log("GET request: ");
   db.find({}, (err, data) => {
