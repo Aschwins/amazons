@@ -23,7 +23,7 @@ wss.on('connection', function (ws) {
     obj = JSON.parse(message);
     for (var key in clients) {
       if (key != obj.playerId) {
-        console.log(`sending message to player ${playerId}: ${obj.data}`)
+        console.log(`sending message to player ${obj.playerId}: ${obj.data}`)
         clients[key].send(JSON.stringify({ data: obj.data }));
       }
     }
