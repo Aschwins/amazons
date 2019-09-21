@@ -434,17 +434,21 @@ async function sendLog(data) {
     A function which sends log data to the server via a POST
     request using the fetch() function.
     */
-    const options = {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //         "Content-Type": "application/json"
+    //     },
+    //     body: JSON.stringify(data)
+    // }
 
-    const response = await fetch('/api/logs', options);
-    const json = await response.json();
-    console.log(json);
+    // const response = await fetch('/api/logs', options);
+    // const json = await response.json();
+    // console.log(json);
+    ws.send(JSON.stringify({
+        playerId,
+        data
+    }));
 }
 
 
