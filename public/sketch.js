@@ -358,18 +358,43 @@ class Board {
         return options;
     }
 
-    moveAmazon(target_i, target_j) {
+    selectedAmazon() {
         /*
-        Moves a selected amazon to square i, j
+        Function that returns (i, j) of the selected Amazon.
         */
+        var selected = undefined;
+
+        for (i = 0; i < boardwidth; i++){
+            for (j = 0; j < boardwidth; j++) {
+                if (board.matrix[i][j].selected == true){
+                    selected = [i, j]
+                }
+            }
+        }
+        return selected;
+    }
+
+    moveAmazon(from_i, from_j, to_i, to_j) {
+        /*
+        Moves a selected amazon to square from (i, j) to (i, j)
+        */
+        // for (i=0; i < boardwidth; i++) {
+        //     for (j=0; j < boardwidth; j++) {
+        //         if (board.matrix[i][j].selected == true) {
+        //             let amazon_color = board.matrix[i][j].state;
+        //             board.matrix[i][j].state = "0"; // remove the old amazon.
+        //             board.matrix[target_i][target_j].state = amazon_color;
+        //             board.matrix[i][j].option = false;
+        //         }
+        //     }
+        // }
+
+        let amazon_color = board.matrix[from_i][from_j].state;
+        board.matrix[from_i][from_j].state = "0";
+        board.matrix[to_i][to_j].state = amazon_color;
         for (i=0; i < boardwidth; i++) {
             for (j=0; j < boardwidth; j++) {
-                if (board.matrix[i][j].selected == true) {
-                    let amazon_color = board.matrix[i][j].state;
-                    board.matrix[i][j].state = "0"; // remove the old amazon.
-                    board.matrix[target_i][target_j].state = amazon_color;
-                    board.matrix[i][j].option = false;
-                }
+                board.matrix[i][j].option = false;
             }
         }
     }
@@ -438,7 +463,7 @@ async function sendMove(data) {
 
 window.addEventListener('move', function(e) {
     var data = JSON.parse(e.detail.data).data;
-    console.log(data.data);
+    console.log(data)
 
     let i = data.i; 
     let j = data.j;

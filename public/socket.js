@@ -7,7 +7,7 @@ ws.onmessage = function(e) {
         playerId = e.data;
     }
     else {
-        let move = new CustomEvent('move', { detail: { data: e.data } });
+        let move = new CustomEvent('move', { "detail": { data: e.data } });
 
         window.dispatchEvent(move);
     }

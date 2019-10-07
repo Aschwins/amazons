@@ -17,9 +17,16 @@ db.loadDatabase();
 var WebSocketServer = require('ws').Server;
 var clients = {};
 wss = new WebSocketServer({port: 40510});
+
 i = 1;
 wss.on('connection', function (ws) {
-  ws.on('message', function (message) {
+	// Upon first connection 
+	clients[i] = ws;
+	ws.send(`${i}`);
+	i++;
+
+	// If connected
+	ws.on('message', function (message) {
     obj = JSON.parse(message);
     for (var key in clients) {
       if (key != obj.playerId) {
@@ -32,12 +39,6 @@ wss.on('connection', function (ws) {
   ws.on('close', function(ws) {
     delete clients[i];
   })
-
-  clients[i] = ws;
-
-  ws.send(`${i}`);
-
-  i++;
 })
 
 // Save data
