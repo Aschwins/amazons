@@ -371,6 +371,7 @@ class Board {
                 }
             }
         }
+        console.log("selected", selected)
         return selected;
     }
 
@@ -392,11 +393,11 @@ class Board {
         let amazon_color = board.matrix[from_i][from_j].state;
         board.matrix[from_i][from_j].state = "0";
         board.matrix[to_i][to_j].state = amazon_color;
-        for (i=0; i < boardwidth; i++) {
-            for (j=0; j < boardwidth; j++) {
-                board.matrix[i][j].option = false;
-            }
-        }
+        // for (i=0; i < boardwidth; i++) {
+        //     for (j=0; j < boardwidth; j++) {
+        //         board.matrix[i][j].option = false;
+        //     }
+        // }
     }
 
     show() {
@@ -465,36 +466,36 @@ window.addEventListener('move', function(e) {
     var data = JSON.parse(e.detail.data).data;
     console.log(data)
 
-    let i = data.i; 
-    let j = data.j;
     let state = data.state;
-    console.log(state);
-    
+    var [to_i, to_j] = data["to"];
     board.state = state;
+    if (state == "white_selects" || state == "black_selects"){
+        var [from_i, from_j] = data["from"];
+    }
 
     if (board.state == "white_selects") {
-        board.moveAmazon(i, j);
+        board.moveAmazon(from_i, from_j, to_i, to_j);
         board.reset("white_shoots"); // reset the board to white_shoots.
         // Prepare shooting
-        board.matrix[i][j].selected = true;
-        board.show_options(i, j);
+        board.matrix[to_i][to_j].selected = true;
+        board.show_options(to_i, to_j);
     }
     else if (board.state == "white_shoots") {
         // shoot arrow
-        board.matrix[i][j].state = "F"; // burn the square
+        board.matrix[to_i][to_j].state = "F"; // burn the square
         board.reset("black_selects");
     }
     else if (board.state == "black_selects") {
-        board.moveAmazon(i, j);
+        board.moveAmazon(from_i, from_j, to_i, to_j);
         board.reset("black_shoots"); // reset the board to white_shoots.
         // Prepare shooting
-        board.matrix[i][j].selected = true;
-        board.show_options(i, j);
+        board.matrix[to_i][to_j].selected = true;
+        board.show_options(to_i, to_j);
     }
     else if (board.state == "black_shoots") {
         // shoot arrow
-        board.matrix[i][j].state = "F"; // burn the square
-        board.reset("black_selects");
+        board.matrix[to_i][to_j].state = "F"; // burn the square
+        board.reset("white_selects");
     }
     else {
         console.log("Something went wrong, please try again.")
@@ -510,16 +511,18 @@ function mousePressed() {
         // Prepare to send move to server
         let state = board.state;
         const data = {
-            i,
-            j,
-            state
+            "state": state,
+            "from": undefined,
+            "to": [i, j]
         };
 
         // White Selects.
         if (board.state == "white_selects") {
-            // If an option gets pressed we move there. 
+            // If an option gets pressed we move there.
             if (board.matrix[i][j].option == true) {
-                board.moveAmazon(i, j);
+                let [selected_amazon_i, selected_amazon_j] = board.selectedAmazon();
+                board.moveAmazon(selected_amazon_i, selected_amazon_j, i, j);
+                data["from"] = [selected_amazon_i, selected_amazon_j];
                 sendMove(data);
                 board.reset("white_shoots"); // reset the board to white_shoots.
                 // Prepare shooting
@@ -562,7 +565,9 @@ function mousePressed() {
         else if (board.state == "black_selects") {
             // If an option gets pressed we move there. 
             if (board.matrix[i][j].option == true) {
-                board.moveAmazon(i, j);
+                let [selected_i, selected_j] = board.selectedAmazon();
+                board.moveAmazon(selected_i, selected_j, i, j);
+                data["from"] = [selected_i, selected_j];
                 sendMove(data);
                 board.reset("black_shoots"); // reset the board to black_shoots.
                 // Prepare shooting

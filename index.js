@@ -27,28 +27,28 @@ wss.on('connection', function (ws) {
 
 	// If connected
 	ws.on('message', function (message) {
-    obj = JSON.parse(message);
-    for (var key in clients) {
-      if (key != obj.playerId) {
-        console.log(`sending message to player ${obj.playerId}: ${obj.data}`)
-        clients[key].send(JSON.stringify({ data: obj.data }));
-      }
-    }
-  })
-  
-  ws.on('close', function(ws) {
-    delete clients[i];
-  })
+		obj = JSON.parse(message);
+		for (var key in clients) {
+			if (key != obj.playerId) {
+				console.log(`sending message to player ${obj.playerId}: ${obj.data}`)
+				clients[key].send(JSON.stringify({ data: obj.data }));
+			}
+		}
+	})
+	
+	ws.on('close', function(ws) {
+		delete clients[i];
+	})
 })
 
 // Save data
 app.post('/api/logs', (request, response) => {
-  console.log(request.body);
-  const data = request.body;
-  data['timestamp'] = Date.now();
-  db.insert(data);
-  ws.send(`ws: ${data}`)
-  response.json(data);
+	console.log(request.body);
+	const data = request.body;
+	data['timestamp'] = Date.now();
+	db.insert(data);
+	ws.send(`ws: ${data}`)
+	response.json(data);
 });
 
 
