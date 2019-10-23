@@ -1,4 +1,5 @@
 var playerId = -1;
+var color = 'None';
 var ws = new WebSocket('ws://localhost:40510/');
 
 ws.onmessage = function(e) {
@@ -7,8 +8,14 @@ ws.onmessage = function(e) {
         playerId = e.data;
     }
     else {
-        let move = new CustomEvent('move', { "detail": { data: e.data } });
-        window.dispatchEvent(move);
+        if (color == 'None'){
+            console.log(`You are player ${e.data}`);
+            color = e.data;
+        }
+        else {
+            let move = new CustomEvent('move', { "detail": { data: e.data } });
+            window.dispatchEvent(move);
+        }
     }
 };
 

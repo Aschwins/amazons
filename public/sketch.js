@@ -457,6 +457,7 @@ class Square {
 
 async function sendMove(data) {
     ws.send(JSON.stringify({
+        type: 'move',
         playerId,
         data
     }));
