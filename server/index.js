@@ -14,11 +14,8 @@ app.use(express.json({
   limit: '1mb'
 }));
 
-
-// Serve data
 var WebSocketServer = require('ws').Server;
 wss = new WebSocketServer({port: 40510});
-
 var matchMaker = new MatchMaker(wss);
 
 matchMaker.start();
