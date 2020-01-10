@@ -4,7 +4,7 @@ const express = require('express')
 const Datastore = require('nedb');
 const MatchMaker = require('./matchmaker');
 const app = express()
-const port = 80
+const port = 3000
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 //const db = new Datastore('database.db')
@@ -15,7 +15,7 @@ app.use(express.json({
 }));
 
 var WebSocketServer = require('ws').Server;
-wss = new WebSocketServer({port: 8080});
+wss = new WebSocketServer({port: 40510});
 var matchMaker = new MatchMaker(wss);
 
 matchMaker.start();

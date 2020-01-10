@@ -1,6 +1,6 @@
 var playerId = -1;
 var color = 'None';
-var ws = new WebSocket('ws://localhost:8080/');
+var ws = new WebSocket('ws://localhost:40510/');
 
 ws.onmessage = function(e) {
     if (playerId == -1) {
